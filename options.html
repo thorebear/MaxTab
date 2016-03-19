@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.css">
+    <title>Options</title>
+</head>
+<body>
+<div class="container">
+    <div class="col-sm-12">
+        <div id="msgArea">
+        </div>
+        <h1>Options</h1>
+        <div class="input-group">
+            <h3>Maximum number of tabs allowed:</h3>
+            <input class="form-control" type="number" id="maxTabs" min="1" step="1" data-bind="value:replyNumber" />
+        </div>
+
+        <div class="input-group">
+            <h3>Action when exceeding the limit:</h3>
+            <div class="radio">
+                <label><input type="radio" name="exceedAction" value="closeLeftmost">Close the leftmost tab</label>
+            </div>
+            <div class="radio">
+                <label><input type="radio" name="exceedAction" value="showWarning">Show notification when opening too many tabs</label>
+            </div>
+        </div>
+
+               <span class="input-group-btn">
+                  <button id="save" class="btn btn-default" type = "button">
+                      Save
+                  </button>
+               </span>
+    </div>
+</div>
+<script src="js/jquery-2.2.2.min.js"></script>
+<script src="options.js"></script>
+<script src="js/bootstrap.min.js"></script>
+</body>
+</html>
