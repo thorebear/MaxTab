@@ -1,5 +1,5 @@
 function save_options() {
-    var maxTabs = parseFloat(document.getElementById('maxTabs').value);
+    var maxTabs = parseFloat($('#maxTabs').val());
     var exceedAction = $("input:radio[name ='exceedAction']:checked").val();
 
     if (isInteger(maxTabs) && maxTabs > 0) {
@@ -7,10 +7,10 @@ function save_options() {
             maxTabs: maxTabs,
             exceedAction: exceedAction
         }, function() {
-            setSuccessMsg("Options saved!");
+            setSuccessMsg(chrome.i18n.getMessage("options_saved"));
         });
     } else {
-        setDangerMsg("Maximum number of tabs most be a positive integer");
+        setDangerMsg(chrome.i18n.getMessage("max_tabs_must_be_integer"));
     }
 }
 
@@ -19,7 +19,7 @@ function restore_options() {
         maxTabs: 5, // default value
         exceedAction: "closeLeftmost" // default value
     }, function (items) {
-        document.getElementById('maxTabs').value = items.maxTabs;
+        $("#maxTabs").val(items.maxTabs);
         $("input:radio[value =" + items.exceedAction + "]").prop("checked", true);
     });
 }
@@ -33,15 +33,17 @@ function setDangerMsg(msg) {
 }
 
 function setMsg(msg, alert_type) {
-    document.getElementById('msgArea').innerHTML = '' +
+    $("#msgArea").html('' +
         '<div class="alert alert-' + alert_type + '">' +
         msg +
-        '</div>';
+        '</div>');
 }
 
 function isInteger(val) {
     return typeof val==='number' && (val%1)===0;
 }
 
-document.addEventListener('DOMContentLoaded', restore_options);
-document.getElementById('save').addEventListener('click', save_options);
+$(document).ready(function() {
+    restore_options();
+    $("#save").on("click", save_options);
+});

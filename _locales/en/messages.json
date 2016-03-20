@@ -28,5 +28,14 @@
   },
   "options": {
     "message": "Options"
+  },
+  "options_saved": {
+    "message": "Options saved!"
+  },
+  "max_tabs_must_be_integer": {
+    "message": "Maximum number of tabs most be a positive integer"
+  },
+  "change_limit": {
+    "message": "Change limit"
   }
 }

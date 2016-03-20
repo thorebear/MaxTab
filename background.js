@@ -27,7 +27,7 @@ chrome.tabs.onCreated.addListener(function () {
                         iconUrl: "icon.png",
                         message: chrome.i18n.getMessage("warning_msg"),
                         buttons: [{
-                            title: "Change limit",
+                            title: chrome.i18n.getMessage("change_limit"),
                             iconUrl: "icons/glyphicons-390-new-window-alt.png"
                         }]
                     });
