@@ -1,13 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "TODO",
-  "description": "TODO",
+  "name": "__MSG_extension_title__",
+  "description": "__MSG_extension_desc__",
   "version": "1.1",
   "background": {
     "persistent": false,
     "page": "background.html"
   },
   "options_page": "options.html",
+  "default_locale": "en",
   "permissions": [
     "activeTab",
     "tabs",

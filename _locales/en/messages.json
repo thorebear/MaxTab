@@ -1,0 +1,32 @@
+{
+  "extension_title": {
+    "message": "TODO!"
+  },
+  "extension_desc": {
+    "message": "TODO_DSC"
+  },
+  "warning_title": {
+    "message": "Warning!"
+  },
+  "warning_msg": {
+    "message": "The number of tabs in the current window is above the specified tab-limit"
+  },
+  "max_tabs_allowed": {
+    "message": "Maximum number of tabs allowed"
+  },
+  "exceeding_action": {
+    "message": "Action when exceeding the limit"
+  },
+  "close_leftmost": {
+    "message": "Close the leftmost tab"
+  },
+  "show_notifications": {
+    "message": "Show notification when opening too many tabs"
+  },
+  "save": {
+    "message": "Save"
+  },
+  "options": {
+    "message": "Options"
+  }
+}

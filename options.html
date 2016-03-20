@@ -10,25 +10,25 @@
     <div class="col-sm-12">
         <div id="msgArea">
         </div>
-        <h1>Options</h1>
+        <h1>__MSG_options__</h1>
         <div class="input-group">
-            <h3>Maximum number of tabs allowed:</h3>
+            <h3>__MSG_max_tabs_allowed__:</h3>
             <input class="form-control" type="number" id="maxTabs" min="1" step="1" data-bind="value:replyNumber" />
         </div>
 
         <div class="input-group">
-            <h3>Action when exceeding the limit:</h3>
+            <h3>__MSG_exceeding_action__:</h3>
             <div class="radio">
-                <label><input type="radio" name="exceedAction" value="closeLeftmost">Close the leftmost tab</label>
+                <label><input type="radio" name="exceedAction" value="closeLeftmost">__MSG_close_leftmost__</label>
             </div>
             <div class="radio">
-                <label><input type="radio" name="exceedAction" value="showWarning">Show notification when opening too many tabs</label>
+                <label><input type="radio" name="exceedAction" value="showWarning">__MSG_show_notifications__</label>
             </div>
         </div>
 
                <span class="input-group-btn">
                   <button id="save" class="btn btn-default" type = "button">
-                      Save
+                      __MSG_save__
                   </button>
                </span>
     </div>
@@ -36,5 +36,6 @@
 <script src="js/jquery-2.2.2.min.js"></script>
 <script src="options.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="js/localize_helper.js"></script>
 </body>
 </html>

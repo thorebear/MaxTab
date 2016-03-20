@@ -23,9 +23,9 @@ chrome.tabs.onCreated.addListener(function () {
                 } else if (items.exceedAction === "showWarning") {
                     chrome.notifications.create(maxTabs.notificationId,{
                         type: "basic",
-                        title: "Warning!",
+                        title: chrome.i18n.getMessage("warning_title"),
                         iconUrl: "icon.png",
-                        message: "The number of tabs in the current window is above the specified tab-limit",
+                        message: chrome.i18n.getMessage("warning_msg"),
                         buttons: [{
                             title: "Change limit",
                             iconUrl: "icons/glyphicons-390-new-window-alt.png"
