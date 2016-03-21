@@ -18,10 +18,17 @@ function restore_options() {
     chrome.storage.sync.get({
         maxTabs: 5, // default value
         exceedAction: "closeLeftmost" // default value
-    }, function (items) {
-        $("#maxTabs").val(items.maxTabs);
-        $("input:radio[value =" + items.exceedAction + "]").prop("checked", true);
-    });
+    },
+        /**
+         * @param {
+         * {maxTabs:int},
+         * {exceedAction:string}
+         * } items
+         */
+        function (items) {
+            $("#maxTabs").val(items.maxTabs);
+            $("input:radio[value =" + items.exceedAction + "]").prop("checked", true);
+        });
 }
 
 function setSuccessMsg(msg) {
