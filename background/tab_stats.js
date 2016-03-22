@@ -31,6 +31,7 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
     var wid = activeInfo.windowId;
 
     chrome_utilities.storage.window.get(wid, "_tab__" + tid, function(items) {
+        items = items["_tab__" + tid];
         if (items === undefined) {
             /*
                 If the tab is just created, it might not have an entry in the storage yet.

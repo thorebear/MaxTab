@@ -1,3 +1,6 @@
+/*
+    Created by: TODO
+ */
 chrome_utilities = {};
 
 /* chrome_utilities.js.storage */
@@ -22,14 +25,38 @@ chrome_utilities.storage.window = {
             items = items[storageId];
             if (typeof keys === "string") {
                 // key-type: string
-                callback(items[keys]);
+                var json = {};
+                json[keys] = items[keys];
+                callback(json);
             } else if (typeof keys === "object") {
                 if (typeof keys[0] === "string") {
                     // key-type: array of strings
-                    error("Not implemented");
+                    var json = {};
+                    keys.forEach(function(_k) {
+                        json[_k] = items[_k];
+                    });
+                    callback(json);
                 } else {
                     // key-type: dictionary specifying default values
-                    error("Not implemented");
+                    var json = {};
+
+                    /*
+                    If there exist no values in the storage, items will be undefined,
+                    in this case we can just return the 'default' value object.
+                     */
+                    if (items === undefined) {
+                        callback(keys);
+                        return;
+                    }
+
+                    Object.keys(keys).forEach(function(_k) {
+                       if (items[_k] === undefined) {
+                           json[_k] = keys[_k];
+                       } else {
+                           json[_k] = items[_k];
+                       }
+                    });
+                    callback(json);
                 }
             }
         });
