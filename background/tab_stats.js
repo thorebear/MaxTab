@@ -17,6 +17,10 @@ chrome.tabs.onRemoved.addListener(function (tid, removeInfo) {
         Notice that we cannot use chrome.tabs.tab.isWindowClosing, since this property is
         only true if the tab is closing because of the window closing and not the other way around.
      */
+
+    chrome_utilities.storage.window.remove(removeInfo.windowId, "__tab_" + tid, function(){
+
+    });
 });
 
 chrome.tabs.onUpdated.addListener(function (tid, changeInfo, tab){
