@@ -39,9 +39,9 @@ chrome_utilities.storage.exeQueue = {
         this.execNext(wid);
     },
     "wrapCallback" : function(wid, callback) {
-        return function() {
+        return function(params) {
             if (callback !== undefined) {
-                callback();
+                callback.call(this, params);
             }
             chrome_utilities.storage.exeQueue.execEnd(wid);
         };
@@ -59,6 +59,44 @@ chrome_utilities.storage.window = {
      * or on failure (in which case runtime.lastError will be set).
      */
     "get": function (wid, keys, callback) {
+        chrome_utilities.storage.exeQueue.push("_get", wid,
+            [keys, chrome_utilities.storage.exeQueue.wrapCallback(wid, callback)]);
+    },
+    /**
+     * Insert on or more values into a window storage.
+     * @param {int} wid - WindowId to set data in.
+     * @param {object} obj - An object which gives each key/value pair to update storage with.
+     * Any other key/value pairs in storage will not be affected.
+     * @param {function} callback - Callback on success, or on failure (in which case runtime.lastError will be set).
+     */
+    "set": function (wid, obj, callback) {
+        chrome_utilities.storage.exeQueue.push("_set", wid,
+            [obj, chrome_utilities.storage.exeQueue.wrapCallback(wid, callback)]);
+    },
+    /**
+     * Remove a or more items from a single window storage.
+     * @param {int} wid - WindowId to - remove from.
+     * @param {string|string[]} keys - A single key or a list of keys for items to remove.
+     * @param {function} callback - Callback on success, or on failure (in which case runtime.lastError will be set).
+     */
+    "remove": function (wid, keys, callback) {
+        chrome_utilities.storage.exeQueue.push("_remove", wid,
+            [keys, chrome_utilities.storage.exeQueue.wrapCallback(wid, callback)]);
+    },
+    /**
+     * Remove all items from a single window storage
+     * @param {int} wid - WindowId to clear all data in
+     * @param {function} callback - callback on success, or on failure (in which case runtime.lastError will be set).
+     */
+    "clear": function (wid, callback) {
+        chrome_utilities.storage.exeQueue.push("_clear", wid,
+            [chrome_utilities.storage.exeQueue.wrapCallback(wid, callback)]);
+    },
+    /**
+     * Private method: Intended only for internal use.
+     * @private
+     */
+    "_get": function(wid, keys, callback){
         var storageId =
             chrome_utilities.storage.getWinStorageId(wid);
         chrome.storage.local.get(storageId, function (items) {
@@ -116,22 +154,31 @@ chrome_utilities.storage.window = {
         });
     },
     /**
-     * Insert on or more values into a window storage.
-     * @param {int} wid - WindowId to set data in.
-     * @param {object} obj - An object which gives each key/value pair to update storage with.
-     * Any other key/value pairs in storage will not be affected.
-     * @param {function} callback - Callback on success, or on failure (in which case runtime.lastError will be set).
+     * Private method: Intended only for internal use.
+     * @private
      */
-    "set": function (wid, obj, callback) {
-        chrome_utilities.storage.exeQueue.push("_set", wid, [obj, chrome_utilities.storage.exeQueue.wrapCallback(wid, callback)]);
+    "_set": function (wid, obj, callback) {
+        var storageId =
+            chrome_utilities.storage.getWinStorageId(wid);
+        chrome.storage.local.get(storageId, function (items) {
+            var json = items[storageId];
+            if (json === undefined) {
+                json = {};
+            }
+            Object.keys(obj).forEach(function (_k) {
+                json[_k] = obj[_k];
+            });
+
+            var newJson = {};
+            newJson[storageId] = json;
+            chrome.storage.local.set(newJson, callback);
+        });
     },
     /**
-     * Remove a or more items from a single window storage.
-     * @param {int} wid - WindowId to - remove from.
-     * @param {string|string[]} keys - A single key or a list of keys for items to remove.
-     * @param {function} callback - Callback on success, or on failure (in which case runtime.lastError will be set).
+     * Private method: Intended only for internal use.
+     * @private
      */
-    "remove": function (wid, keys, callback) {
+    "_remove": function (wid, keys, callback) {
         var storageId =
             chrome_utilities.storage.getWinStorageId(wid);
 
@@ -153,42 +200,14 @@ chrome_utilities.storage.window = {
         });
     },
     /**
-     * Remove all items from a single window storage
-     * @param {int} wid - WindowId to clear all data in
-     * @param {function} callback - callback on success, or on failure (in which case runtime.lastError will be set).
+     * Private method: Intended only for internal use.
+     * @private
      */
-    "clear": function (wid, callback) {
+    "_clear": function (wid, callback) {
         chrome.storage.local.remove(chrome_utilities.storage.getWinStorageId(wid), callback);
-    },
-
-    "_set": function (wid, obj, callback) {
-        var storageId =
-            chrome_utilities.storage.getWinStorageId(wid);
-        chrome.storage.local.get(storageId, function (items) {
-            var json = items[storageId];
-            if (json === undefined) {
-                json = {};
-            }
-            Object.keys(obj).forEach(function (_k) {
-                json[_k] = obj[_k];
-            });
-
-            var newJson = {};
-            newJson[storageId] = json;
-            chrome.storage.local.set(newJson, callback);
-        });
     }
-
 };
-
 /* Window event listeners */
 chrome.windows.onRemoved.addListener(function (wid) {
-    /*
-    We wait a little while before removing the window storage after the
-    window is closed to ensure that every other operation working on the
-    storage has terminated.
-     */
-    setTimeout(function() {
-        chrome_utilities.storage.window.clear(wid);
-    }, 100);
+    chrome_utilities.storage.window.clear(wid);
 });

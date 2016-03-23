@@ -143,4 +143,23 @@ describe("chrome_utilities.storage.window", function () {
             });
         });
     });
+
+    it("Remove info in window storage, will not prevent the storage from being cleared", function(done) {
+        chrome_utilities.storage.window.set(wid, {
+            "v1": "value1",
+            "v2": "value2"
+        }, function () {
+            chrome_utilities.storage.window.remove(wid, ["v1"]);
+            chrome_utilities.storage.window.clear(wid, function() {
+            chrome_utilities.storage.window.get(wid, {
+                    "v1": "default1",
+                    "v2": "default2"
+                }, function (items) {
+                    expect(items.v1).toEqual("default1");
+                    expect(items.v2).toEqual("default2");
+                    done();
+                });
+            });
+        });
+    });
 });

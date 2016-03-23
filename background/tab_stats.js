@@ -13,7 +13,11 @@ chrome.tabs.onCreated.addListener(function (tab) {
 });
 
 chrome.tabs.onRemoved.addListener(function (tid, removeInfo) {
+    if (removeInfo.isWindowClosing) {
+        return;
+    }
 
+    chrome_utilities.storage.window.remove(removeInfo.windowId, "_tab__" + tid);
 });
 
 chrome.tabs.onUpdated.addListener(function (tid, changeInfo, tab){
