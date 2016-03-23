@@ -10,6 +10,45 @@ chrome_utilities.storage.getWinStorageId = function (wid) {
     return "_window__" + wid;
 }
 
+
+chrome_utilities.storage.exeQueue = {
+    "executing": false,
+    "queue": {},
+    "wrapFunction": function(fn, params) {
+      return function() {
+        fn.apply(this, params);
+      };
+    },
+    "push" : function(fn_name, wid, params) {
+        if (this.queue[wid] === undefined) {
+            this.queue[wid] = [];
+        }
+        var fn = chrome_utilities.storage.window[fn_name];
+        params.unshift(wid);
+        this.queue[wid].push(this.wrapFunction(fn, params));
+        this.execNext(wid);
+    },
+    "execNext" : function(wid) {
+        if (this.queue[wid].length > 0 && !this.executing) {
+             this.executing = true;
+            (this.queue[wid].shift())();
+        }
+    },
+    "execEnd" : function(wid) {
+        this.executing = false;
+        this.execNext(wid);
+    },
+    "wrapCallback" : function(wid, callback) {
+        return function() {
+            if (callback !== undefined) {
+                callback();
+            }
+            chrome_utilities.storage.exeQueue.execEnd(wid);
+        };
+    }
+
+
+}
 chrome_utilities.storage.window = {
     /**
      * Get on or more values from a single window storage.
@@ -84,22 +123,7 @@ chrome_utilities.storage.window = {
      * @param {function} callback - Callback on success, or on failure (in which case runtime.lastError will be set).
      */
     "set": function (wid, obj, callback) {
-        var storageId =
-            chrome_utilities.storage.getWinStorageId(wid);
-        chrome.storage.local.get(storageId, function (items) {
-            var json = items[storageId];
-            if (json === undefined) {
-                json = {};
-            }
-            Object.keys(obj).forEach(function (_k) {
-                json[_k] = obj[_k];
-            });
-
-            var newJson = {};
-            newJson[storageId] = json;
-            chrome.storage.local.set(newJson, callback);
-        });
-
+        chrome_utilities.storage.exeQueue.push("_set", wid, [obj, chrome_utilities.storage.exeQueue.wrapCallback(wid, callback)]);
     },
     /**
      * Remove a or more items from a single window storage.
@@ -135,6 +159,24 @@ chrome_utilities.storage.window = {
      */
     "clear": function (wid, callback) {
         chrome.storage.local.remove(chrome_utilities.storage.getWinStorageId(wid), callback);
+    },
+
+    "_set": function (wid, obj, callback) {
+        var storageId =
+            chrome_utilities.storage.getWinStorageId(wid);
+        chrome.storage.local.get(storageId, function (items) {
+            var json = items[storageId];
+            if (json === undefined) {
+                json = {};
+            }
+            Object.keys(obj).forEach(function (_k) {
+                json[_k] = obj[_k];
+            });
+
+            var newJson = {};
+            newJson[storageId] = json;
+            chrome.storage.local.set(newJson, callback);
+        });
     }
 
 };
