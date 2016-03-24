@@ -111,6 +111,7 @@ chrome_utilities.storage.window = {
                 // key-type: string
                 if (items === undefined) {
                     callback();
+                    return;
                 }
 
                 var json = {};
