@@ -1,13 +1,16 @@
 describe("chrome_utilities.storage.window", function () {
 
-    beforeEach(function(done) {
+    var wid = "UnitTestId";
+
+    beforeEach(function() {
         jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
-        chrome.storage.local.clear(done);
+    });
+
+    afterEach(function(done) {
+        chrome_utilities.storage.window.clear(wid, done);
     });
 
     describe("functions", function() {
-        var wid = "UnitTestId";
-
         it("Returns only a single value, when ask for a single value", function (done) {
             chrome_utilities.storage.window.set(wid, {
                 "v1": 1,
@@ -151,15 +154,13 @@ describe("chrome_utilities.storage.window", function () {
                     "v1": "value1",
                     "v2": "value2"
                 }, function () {
-                    chrome_utilities.storage.window.remove(wid, "v1");
                     chrome.windows.remove(wid, function () {
                         setTimeout(function () {
-
                             chrome_utilities.storage.window.get(wid, "v2", function (items) {
                                 expect(items).toBe(undefined);
                                 done();
                             });
-                        }, 4500);
+                        }, 2500);
                     });
                 });
             });

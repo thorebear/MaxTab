@@ -1,3 +1,4 @@
+
 tab_stats = {};
 
 tab_stats = {
@@ -56,27 +57,8 @@ chrome.tabs.onReplaced.addListener(function(addedTid, removedTid) {
 chrome.tabs.onUpdated.addListener(function (tid, changeInfo, tab) {
     var wid = tab.windowId;
 
-    chrome_utilities.storage.window.get(wid, "_tab__" + tid, function (items) {
-        /*
-         If the tab is created along with a new window there might not be an 'window' storage entry for this window yet.
-         In this case we will just ignore this event.
-         */
-        if (items === undefined) {
-            return;
-        }
-        items = items["_tab__" + tid];
-        if (items === undefined) {
-            /*
-             If the tab is just created, it might not have an entry in the storage yet.
-             In this case we won't update anything.
-             */
-            return;
-        } else {
-            items.last_updated = new Date().getTime();
-            var json = {};
-            json["_tab__" + tid] = items;
-            chrome_utilities.storage.window.set(wid, json);
-        }
+    chrome_utilities.storage.window.update(wid, "_tab__" + tid, function (oldVal) {
+        oldVal.last_updated = new Date().getTime();
     });
 });
 
@@ -84,28 +66,9 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
     var tid = activeInfo.tabId;
     var wid = activeInfo.windowId;
 
-    chrome_utilities.storage.window.get(wid, "_tab__" + tid, function (items) {
-        /*
-        If the tab is created along with a new window there might not be an 'window' storage entry for this window yet.
-        In this case we will just ignore this event.
-         */
-        if (items === undefined) {
-            return;
-        }
-        items = items["_tab__" + tid];
-        if (items === undefined) {
-            /*
-             If the tab is just created, it might not have an entry in the storage yet.
-             In this case we won't update anything.
-             */
-            return;
-        } else {
-            items.last_active = new Date().getTime();
-            items.times_activated = items.times_activated + 1;
-            var json = {};
-            json["_tab__" + tid] = items;
-            chrome_utilities.storage.window.set(wid, json);
-        }
+    chrome_utilities.storage.window.update(wid, "_tab__" + tid, function (oldVal) {
+        oldVal.last_active = new Date().getTime();
+        oldVal.times_activated = oldVal.times_activated + 1;
     });
 });
 

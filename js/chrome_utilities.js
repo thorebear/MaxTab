@@ -1,6 +1,9 @@
 /*
  Created by: TODO
  */
+
+var __DEBUG__ = true;
+
 chrome_utilities = {};
 
 /* chrome_utilities.js.storage */
@@ -8,8 +11,7 @@ chrome_utilities.storage = {};
 
 chrome_utilities.storage.getWinStorageId = function (wid) {
     return "_window__" + wid;
-}
-
+};
 
 chrome_utilities.storage.exeQueue = {
     "executing": false,
@@ -43,11 +45,12 @@ chrome_utilities.storage.exeQueue = {
             if (callback !== undefined) {
                 callback.call(this, params);
             }
+            if (chrome.runtime.lastError && __DEBUG__) {
+                console.warn(chrome.runtime.lastError.message);
+            }
             chrome_utilities.storage.exeQueue.execEnd(wid);
         };
     }
-
-
 }
 chrome_utilities.storage.window = {
     /**
@@ -75,13 +78,25 @@ chrome_utilities.storage.window = {
     },
     /**
      * Remove a or more items from a single window storage.
-     * @param {int} wid - WindowId to - remove from.
+     * @param {int} wid - WindowId to remove from.
      * @param {string|string[]} keys - A single key or a list of keys for items to remove.
      * @param {function} callback - Callback on success, or on failure (in which case runtime.lastError will be set).
      */
     "remove": function (wid, keys, callback) {
         chrome_utilities.storage.exeQueue.push("_remove", wid,
             [keys, chrome_utilities.storage.exeQueue.wrapCallback(wid, callback)]);
+    },
+    /**
+     * Update a value in the given window storage.
+     * @param {int} wid - WindowId to update in.
+     * @param {string} key - 'key' of the value to update
+     * @param {function} updateValue - A function which take the old value
+     * as parameter and update the value to the new value.
+     * @param {function} callback - Callback on success, or on failure (in which case runtime.lastError will be set).
+     */
+    "update": function (wid, key, updateValue, callback) {
+        chrome_utilities.storage.exeQueue.push("_update", wid,
+            [key, updateValue, chrome_utilities.storage.exeQueue.wrapCallback(wid, callback)]);
     },
     /**
      * Remove all items from a single window storage
@@ -206,6 +221,21 @@ chrome_utilities.storage.window = {
      */
     "_clear": function (wid, callback) {
         chrome.storage.local.remove(chrome_utilities.storage.getWinStorageId(wid), callback);
+    },
+    /**
+     * Private method: Intended only for internal use.
+     * @private
+     */
+    "_update": function (wid, key, updateValue, callback) {
+        chrome_utilities.storage.window._get(wid, key, function(items) {
+            if (items === undefined) {
+                callback();
+                return;
+            }
+
+            updateValue(items[key]);
+            chrome_utilities.storage.window._set(wid, items, callback);
+        });
     }
 };
 /* Window event listeners */
