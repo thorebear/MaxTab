@@ -68,5 +68,92 @@ describe("tab_stats", function () {
             });
         });
 
+        it("Activating a tab will update the 'last_active' and 'times_activated' value", function(done) {
+            chrome_utilities.storage.window.get(wid1, "_tab__" + tid1_1, function (items) {
+                var oldVal = items["_tab__" + tid1_1].last_active;
+                var oldVal2 = items["_tab__" + tid1_1].times_activated;
+                chrome.tabs.create({
+                    "windowId" : wid1,
+                    "active" : true
+                }, function(tab) {
+                    chrome.tabs.update(tid1_1, {active: true}, function () {
+                        setTimeout(function () {
+                            chrome_utilities.storage.window.get(wid1, "_tab__" + tid1_1, function (items2) {
+                                var newVal = items2["_tab__" + tid1_1].last_active;
+                                var newVal2 = items2["_tab__" + tid1_1].times_activated;
+                                expect(newVal).toBeGreaterThan(oldVal);
+                                expect(oldVal2 + 1).toEqual(newVal2);
+                                done();
+                            });
+                        }, 1000);
+                    });
+                });
+            })
+        });
+
+        it("Updating a tab will update the 'last_updated' value", function(done) {
+            chrome_utilities.storage.window.get(wid1, "_tab__" + tid1_1, function (items) {
+                var oldVal = items["_tab__" + tid1_1].last_updated;
+                chrome.tabs.create({
+                    "windowId" : wid1,
+                    "active" : true
+                }, function(tab) {
+                    chrome.tabs.update(tid1_1, { "url": "127.0.0.1"}, function () {
+                        setTimeout(function () {
+                            chrome_utilities.storage.window.get(wid1, "_tab__" + tid1_1, function (items2) {
+                                var newVal = items2["_tab__" + tid1_1].last_updated;
+                                expect(newVal).toBeGreaterThan(oldVal);
+                                done();
+                            });
+                        }, 1000);
+                    });
+                });
+            })
+        });
+
+        it("Moving a tab away from a window will remove the tab data from the win storage", function(done) {
+            chrome_utilities.storage.window.get(wid1, "_tab__" + tid1_1, function(items) {
+                expect(items["_tab__" + tid1_1]).toBeDefined();
+
+                chrome.tabs.move(tid1_1, {
+                    "windowId": wid2,
+                    "index": -1
+                }, function (tab) {
+                    setTimeout(function() {
+                        chrome_utilities.storage.window.get(wid1, "_tab__" + tid1_1, function (items) {
+                            expect(items["_tab__" + tid1_1]).toBeUndefined();
+                            done();
+                        });
+                    }, 1500);
+                });
+            });
+        });
+
+        it("Moving a tab to a new window will create tab data in the new win storage", function(done) {
+            chrome_utilities.storage.window.get(wid2, "_tab__" + tid1_1, function(items) {
+                expect(items["_tab__" + tid1_1]).toBeUndefined();
+
+                chrome.tabs.move(tid1_1, {
+                    "windowId": wid2,
+                    "index": -1
+                }, function (tab) {
+                    setTimeout(function() {
+                        chrome_utilities.storage.window.get(wid2, "_tab__" + tid1_1, function (items) {
+                            expect(items["_tab__" + tid1_1]).toBeDefined();
+                            done();
+                        });
+                    }, 1500);
+                });
+            });
+        });
+
+        xit("When a tab is replaced, the data is removed", function(done) {
+
+        });
+
+        xit("When a tab is replacing, tab data is added", function(done) {
+
+        });
+
     });
 });

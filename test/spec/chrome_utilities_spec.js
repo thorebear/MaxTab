@@ -145,7 +145,6 @@ describe("chrome_utilities.storage.window", function () {
     });
 
     describe("behavior", function() {
-
         it("Closing a window will remove all the storage (after some time).", function (done) {
             chrome.windows.create(function (window) {
                 wid = window.id;
