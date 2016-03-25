@@ -1,9 +1,9 @@
 describe("chrome_utilities.storage.window", function () {
 
-    var wid = "UnitTestId";
+    var wid = 123456;
 
     beforeEach(function() {
-        jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = 3000;
     });
 
     afterEach(function(done) {
@@ -145,11 +145,10 @@ describe("chrome_utilities.storage.window", function () {
     });
 
     describe("behavior", function() {
+
         it("Closing a window will remove all the storage (after some time).", function (done) {
-
             chrome.windows.create(function (window) {
-                var wid = window.id;
-
+                wid = window.id;
                 chrome_utilities.storage.window.set(wid, {
                     "v1": "value1",
                     "v2": "value2"
@@ -160,7 +159,7 @@ describe("chrome_utilities.storage.window", function () {
                                 expect(items).toBe(undefined);
                                 done();
                             });
-                        }, 2500);
+                        }, 1500);
                     });
                 });
             });

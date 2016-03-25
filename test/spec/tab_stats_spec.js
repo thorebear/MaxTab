@@ -64,7 +64,7 @@ describe("tab_stats", function () {
                         expect(items["_tab__" + tid1_1]).toBeUndefined();
                         done();
                     });
-                }, 300);
+                }, 1500);
             });
         });
 
