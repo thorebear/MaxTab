@@ -148,7 +148,7 @@ describe("tab_stats", function () {
         });
 
         xit("When a tab is replaced, the data is removed", function(done) {
-
+            
         });
 
         xit("When a tab is replacing, tab data is added", function(done) {

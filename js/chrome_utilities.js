@@ -1,8 +1,25 @@
 /*
- Created by: TODO
- */
+ Copyright (c) 2016 Thorbjørn Søgaard Christensen <cvcv90@gmail.com>
 
-var __DEBUG__ = true;
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 
 chrome_utilities = {};
 
@@ -13,45 +30,6 @@ chrome_utilities.storage.getWinStorageId = function (wid) {
     return "_window__" + wid;
 };
 
-chrome_utilities.storage.exeQueue = {
-    "executing": false,
-    "queue": {},
-    "wrapFunction": function(fn, params) {
-      return function() {
-        fn.apply(this, params);
-      };
-    },
-    "push" : function(fn_name, wid, params) {
-        if (this.queue[wid] === undefined) {
-            this.queue[wid] = [];
-        }
-        var fn = chrome_utilities.storage.window[fn_name];
-        params.unshift(wid);
-        this.queue[wid].push(this.wrapFunction(fn, params));
-        this.execNext(wid);
-    },
-    "execNext" : function(wid) {
-        if (this.queue[wid].length > 0 && !this.executing) {
-             this.executing = true;
-            (this.queue[wid].shift())();
-        }
-    },
-    "execEnd" : function(wid) {
-        this.executing = false;
-        this.execNext(wid);
-    },
-    "wrapCallback" : function(wid, callback) {
-        return function(params) {
-            if (callback !== undefined) {
-                callback.call(this, params);
-            }
-            if (chrome.runtime.lastError && __DEBUG__) {
-                console.warn(chrome.runtime.lastError.message);
-            }
-            chrome_utilities.storage.exeQueue.execEnd(wid);
-        };
-    }
-}
 chrome_utilities.storage.window = {
     /**
      * Get on or more values from a single window storage.
@@ -62,8 +40,8 @@ chrome_utilities.storage.window = {
      * or on failure (in which case runtime.lastError will be set).
      */
     "get": function (wid, keys, callback) {
-        chrome_utilities.storage.exeQueue.push("_get", wid,
-            [keys, chrome_utilities.storage.exeQueue.wrapCallback(wid, callback)]);
+        chrome_utilities.storage._exeQueue.push("_get", wid,
+            [keys, chrome_utilities.storage._exeQueue.wrapCallback(wid, callback)]);
     },
     /**
      * Insert on or more values into a window storage.
@@ -73,8 +51,8 @@ chrome_utilities.storage.window = {
      * @param {function} callback - Callback on success, or on failure (in which case runtime.lastError will be set).
      */
     "set": function (wid, obj, callback) {
-        chrome_utilities.storage.exeQueue.push("_set", wid,
-            [obj, chrome_utilities.storage.exeQueue.wrapCallback(wid, callback)]);
+        chrome_utilities.storage._exeQueue.push("_set", wid,
+            [obj, chrome_utilities.storage._exeQueue.wrapCallback(wid, callback)]);
     },
     /**
      * Remove a or more items from a single window storage.
@@ -83,8 +61,8 @@ chrome_utilities.storage.window = {
      * @param {function} callback - Callback on success, or on failure (in which case runtime.lastError will be set).
      */
     "remove": function (wid, keys, callback) {
-        chrome_utilities.storage.exeQueue.push("_remove", wid,
-            [keys, chrome_utilities.storage.exeQueue.wrapCallback(wid, callback)]);
+        chrome_utilities.storage._exeQueue.push("_remove", wid,
+            [keys, chrome_utilities.storage._exeQueue.wrapCallback(wid, callback)]);
     },
     /**
      * Update a value in the given window storage.
@@ -95,8 +73,8 @@ chrome_utilities.storage.window = {
      * @param {function} callback - Callback on success, or on failure (in which case runtime.lastError will be set).
      */
     "update": function (wid, key, updateValue, callback) {
-        chrome_utilities.storage.exeQueue.push("_update", wid,
-            [key, updateValue, chrome_utilities.storage.exeQueue.wrapCallback(wid, callback)]);
+        chrome_utilities.storage._exeQueue.push("_update", wid,
+            [key, updateValue, chrome_utilities.storage._exeQueue.wrapCallback(wid, callback)]);
     },
     /**
      * Remove all items from a single window storage
@@ -104,8 +82,8 @@ chrome_utilities.storage.window = {
      * @param {function} callback - callback on success, or on failure (in which case runtime.lastError will be set).
      */
     "clear": function (wid, callback) {
-        chrome_utilities.storage.exeQueue.push("_clear", wid,
-            [chrome_utilities.storage.exeQueue.wrapCallback(wid, callback)]);
+        chrome_utilities.storage._exeQueue.push("_clear", wid,
+            [chrome_utilities.storage._exeQueue.wrapCallback(wid, callback)]);
     },
     /**
      * Private method: Intended only for internal use.
@@ -238,6 +216,45 @@ chrome_utilities.storage.window = {
         });
     }
 };
+
+chrome_utilities.storage._exeQueue = {
+    "executing": false,
+    "queue": {},
+    "wrapFunction": function(fn, params) {
+        return function() {
+            fn.apply(this, params);
+        };
+    },
+    "push" : function(fn_name, wid, params) {
+        if (this.queue[wid] === undefined) {
+            this.queue[wid] = [];
+        }
+        var fn = chrome_utilities.storage.window[fn_name];
+        params.unshift(wid);
+        this.queue[wid].push(this.wrapFunction(fn, params));
+        this.execNext(wid);
+    },
+    "execNext" : function(wid) {
+        if (this.queue[wid].length > 0 && !this.executing) {
+            this.executing = true;
+            (this.queue[wid].shift())();
+        }
+    },
+    "execEnd" : function(wid) {
+        this.executing = false;
+        this.execNext(wid);
+    },
+    "wrapCallback" : function(wid, callback) {
+        return function(params) {
+            if (callback !== undefined) {
+                callback.call(this, params);
+            }
+            chrome_utilities.storage._exeQueue.execEnd(wid);
+        };
+    }
+};
+
+
 /* Window event listeners */
 chrome.windows.onRemoved.addListener(function (wid) {
     chrome_utilities.storage.window.clear(wid);
