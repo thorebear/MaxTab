@@ -12,10 +12,19 @@
     "message": "The number of tabs in the current window is above the specified tab-limit"
   },
   "max_tabs_allowed": {
-    "message": "Maximum number of tabs allowed"
+    "message": "Maximum number of tabs allowed in each window"
   },
   "exceeding_action": {
     "message": "Action when exceeding the limit"
+  },
+  "additional_settings": {
+    "message": "Additional settings"
+  },
+  "count_pinned_tabs": {
+    "message": "Count pinned tabs in the tab limit"
+  },
+  "close_pinned_tabs": {
+    "message": "Close pinned tabs"
   },
   "close_leftmost": {
     "message": "Close the leftmost tab"

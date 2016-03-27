@@ -3,6 +3,9 @@
   "name": "__MSG_extension_title__",
   "description": "__MSG_extension_desc__",
   "version": "1.1",
+  "icons": {
+    "48": "icons/tab_new_raised.png"
+  },
   "background": {
     "persistent": false,
     "page": "background/background.html"

@@ -1,11 +1,26 @@
+max_tabs = { "options" : {}};
+
+max_tabs.options.defaultSettings = {
+    // default values
+    maxTabs: 5,
+    exceedAction: "closeLeftmost",
+    countPinned: false,
+    closePinned: false
+};
+
 function save_options() {
     var maxTabs = parseFloat($('#maxTabs').val());
     var exceedAction = $("input:radio[name ='exceedAction']:checked").val();
+    
+    var countPinned = $("#count_pinned").prop("checked");
+    var closePinned = $("#close_pinned").prop("checked");
 
     if (isInteger(maxTabs) && maxTabs > 0) {
         chrome.storage.sync.set({
             maxTabs: maxTabs,
-            exceedAction: exceedAction
+            exceedAction: exceedAction,
+            countPinned: countPinned,
+            closePinned: closePinned
         }, function() {
             setSuccessMsg(chrome.i18n.getMessage("options_saved"));
         });
@@ -15,19 +30,20 @@ function save_options() {
 }
 
 function restore_options() {
-    chrome.storage.sync.get({
-        maxTabs: 5, // default value
-        exceedAction: "closeLeftmost" // default value
-    },
+    chrome.storage.sync.get(max_tabs.options.defaultSettings,
         /**
          * @param {
          * {maxTabs:int},
-         * {exceedAction:string}
+         * {exceedAction:string},
+         * {countPinned:boolean},
+         * {closePinned:boolean}
          * } items
          */
         function (items) {
             $("#maxTabs").val(items.maxTabs);
             $("input:radio[value =" + items.exceedAction + "]").prop("checked", true);
+            $("#count_pinned").prop("checked", items.countPinned);
+            $("#close_pinned").prop("checked", items.closePinned);
         });
 }
 
