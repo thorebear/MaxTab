@@ -8,6 +8,7 @@ max_tabs.defaultSettings = {
     countPinned: false,
     closePinned: false
 };
+
 max_tabs.notificationId = "numOfTabsExceededWarning";
 
 max_tabs.onTabAddedOrUnpinned = function (wid, tid) {
@@ -36,7 +37,7 @@ max_tabs.onTabAddedOrUnpinned = function (wid, tid) {
                     tab_stats.addTabStats(tabs[0].windowId, tabs, function (tabs) {
 
                         // filter the tab that was just opened/unpinned:
-                        tabs.filter(function (tab) {
+                        tabs = tabs.filter(function (tab) {
                             return tab.id !== tid;
                         });
 
@@ -68,16 +69,24 @@ max_tabs.onTabAddedOrUnpinned = function (wid, tid) {
                                 tabsToClose = tabs.splice(0, numToClose);
                                 break;
                             case "closeLRActive":
+                                tabsToClose = tabs.sort(function(a,b) {
+                                    return b.last_active < a.last_active;
+                                }).splice(0, numToClose);
                                 break;
                             case "closeLRUpdated":
+                                tabsToClose = tabs.sort(function(a,b) {
+                                    return b.last_updated < a.last_updated;
+                                }).splice(0, numToClose);
                                 break;
                             case "closeOldest":
+                                tabsToClose = tabs.sort(function(a,b) {
+                                    return b.opened_time < a.opened_time;
+                                }).splice(0, numToClose);
                                 break;
                             case "closeRandom":
                                 tabsToClose = tabs.shuffle().splice(0, numToClose);
                                 break;
                         }
-
 
                         var idsToClose = tabsToClose.map(function (tab) {
                             return tab.id
@@ -87,7 +96,7 @@ max_tabs.onTabAddedOrUnpinned = function (wid, tid) {
                 }
             });
         });
-}
+};
 
 chrome.tabs.onCreated.addListener(function (tab) {
     var wid = tab.windowId;

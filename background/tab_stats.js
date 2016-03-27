@@ -16,18 +16,6 @@ tab_stats = {
             callback(tabs);
         });
     },
-    "getLeastRecentlyActivatedTab": function (wid, allowPinned, callback) {
-        this._getMin(wid, allowPinned, "last_active", callback);
-    },
-    "getLeastRecentlyOpenedTab" : function (wid, allowPinned, callback) {
-        this._getMin(wid, allowPinned, "opened_time", callback);
-    },
-    "getLeastRecentlyUpdatedTab" : function (wid, allowPinned, callback) {
-        this._getMin(wid, allowPinned, "last_updated", callback);
-    },
-    "getLeastTimesActivatedTab" : function (wid, allowPinned, callback) {
-        this._getMin(wid, allowPinned, "times_activated", callback);
-    },
     "_tabCreated": function (wid, tid) {
         var currTime = new Date().getTime();
         var json = {};
@@ -39,51 +27,7 @@ tab_stats = {
         };
 
         chrome_utilities.storage.window.set(wid, json);
-    },
-    "_getMin": function (wid, allowPinned, parameter, callback) {
-        var _getMineFiltering = function(filteringIds) {
-            chrome_utilities.storage.window.get(wid, null, function (items) {
-                var minKey = undefined;
-                Object.keys(items).forEach(function (key) {
-                    if (key.substring(0, 6) === "_tab__") {
-                        var tid = parseInt(key.substring(6));
-                        if (filteringIds.indexOf(tid) == -1) {
-                            if (minKey === undefined ||
-                                items[key][parameter] < items[minKey][parameter]) {
-                                minKey = key;
-                            }
-                        }
-                    }
-                });
-                if (minKey === undefined) {
-                    callback();
-                } else {
-                    var minTid = minKey.substring(6);
-                    chrome.tabs.get(parseInt(minTid), callback);
-                }
-            });
-        };
-
-        /*
-        If we do not allow pinned, we start by getting the id's of all pinned tabs,
-        such that we can filter these tabs.
-         */
-        if (allowPinned) {
-            _getMineFiltering([]);
-        } else {
-            chrome.tabs.query({
-                "windowId" : wid,
-                "pinned" : true
-            }, function(tabs) {
-                var pinnedIds = [];
-                tabs.forEach(function(tab) {
-                    pinnedIds.push(tab.id);
-                });
-                _getMineFiltering(pinnedIds);
-            });
-        }
     }
-
 };
 
 chrome.tabs.onCreated.addListener(function (tab) {
@@ -115,7 +59,6 @@ chrome.tabs.onDetached.addListener(function (tid, detachInfo) {
     chrome_utilities.storage.window.remove(detachInfo.oldWindowId, "_tab__" + tid);
 });
 
-// TODO: Test this
 chrome.tabs.onReplaced.addListener(function (addedTid, removedTid) {
     chrome.tabs.get(addedTid, function (tab) {
         var wid = tab.windowId;
