@@ -63,8 +63,7 @@ max_tabs.onTabAddedOrUnpinned = function (wid, tid) {
                         }
 
                         if (options.exceedAction === "preventNewTab") {
-                            console.warn("TODO: Not implemented");
-                            // TODO
+                            chrome.tabs.remove(tid);
                             return;
                         }
 

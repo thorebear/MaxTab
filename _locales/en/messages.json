@@ -1,9 +1,9 @@
 {
   "extension_title": {
-    "message": "TODO!"
+    "message": "MaxTabs"
   },
   "extension_desc": {
-    "message": "TODO_DSC"
+    "message": "Limiting the number of tabs opened at the same time in a single window."
   },
   "warning_title": {
     "message": "Warning!"
