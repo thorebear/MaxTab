@@ -208,6 +208,11 @@ chrome_utilities.storage.window = {
                 return;
             }
 
+            if (items[key] === undefined) {
+                callback();
+                return;
+            }
+            
             updateValue(items[key]);
             chrome_utilities.storage.window._set(wid, items, callback);
         });
