@@ -1,10 +1,17 @@
+// Set default settings on new installation!
+chrome.runtime.onInstalled.addListener(function (details) {
+    if (details.reason == "install") {
+        chrome.storage.sync.set(max_tabs.defaultSettings);
+    }
+});
+
 // settings:
 var max_tabs = {};
 
 max_tabs.defaultSettings = {
     // default values
     maxTabs: 5,
-    exceedAction: "closeLeftmost",
+    exceedAction: "closeLRActive",
     countPinned: false,
     closePinned: false
 };
@@ -69,17 +76,17 @@ max_tabs.onTabAddedOrUnpinned = function (wid, tid) {
                                 tabsToClose = tabs.splice(0, numToClose);
                                 break;
                             case "closeLRActive":
-                                tabsToClose = tabs.sort(function(a,b) {
+                                tabsToClose = tabs.sort(function (a, b) {
                                     return b.last_active < a.last_active;
                                 }).splice(0, numToClose);
                                 break;
                             case "closeLRUpdated":
-                                tabsToClose = tabs.sort(function(a,b) {
+                                tabsToClose = tabs.sort(function (a, b) {
                                     return b.last_updated < a.last_updated;
                                 }).splice(0, numToClose);
                                 break;
                             case "closeOldest":
-                                tabsToClose = tabs.sort(function(a,b) {
+                                tabsToClose = tabs.sort(function (a, b) {
                                     return b.opened_time < a.opened_time;
                                 }).splice(0, numToClose);
                                 break;
