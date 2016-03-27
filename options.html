@@ -19,7 +19,30 @@
         <div class="input-group">
             <h3>__MSG_exceeding_action__:</h3>
             <div class="radio">
+                <label><input type="radio" name="exceedAction" value="closeLRActive">
+                    __MSG_close_least_recentlyActive__
+                </label>
+            </div>
+            <div class="radio">
+                <label><input type="radio" name="exceedAction" value="closeLRUpdated">
+                    __MSG_close_least_recentlyUpdated__
+                </label>
+            </div>
+            <div class="radio">
+                <label><input type="radio" name="exceedAction" value="closeOldest">
+                    __MSG_close_oldest_tab__
+                </label>
+            </div>
+            <div class="radio">
+                <label><input type="radio" name="exceedAction" value="closeRandom">
+                    __MSG_close_random__
+                </label>
+            </div>
+            <div class="radio">
                 <label><input type="radio" name="exceedAction" value="closeLeftmost">__MSG_close_leftmost__</label>
+            </div>
+            <div class="radio">
+                <label><input type="radio" name="exceedAction" value="preventNewTab">__MSG_prevent_newTab__</label>
             </div>
             <div class="radio">
                 <label><input type="radio" name="exceedAction" value="showWarning">__MSG_show_notifications__</label>

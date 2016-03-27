@@ -20,6 +20,24 @@
   "close_leftmost": {
     "message": "Close the leftmost tab"
   },
+  "close_least_recentlyActive" : {
+    "message": "Close the least recently active tab"
+  },
+  "close_least_recentlyUpdated" : {
+    "message": "Close the least recently updated tab"
+  },
+  "close_least_timesActivated" : {
+    "message": "Close the tab that has been active the least number of times"
+  },
+  "close_oldest_tab" : {
+    "message": "Close the tab that has been opened for longest"
+  },
+  "close_random" : {
+    "message": "Close a random tab"
+  },
+  "prevent_newTab" : {
+    "message": "Prevent a new tab from being opened"
+  },
   "show_notifications": {
     "message": "Show notification when opening too many tabs"
   },

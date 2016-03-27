@@ -1,5 +1,5 @@
 // settings:
-var maxTabs = {}
+var maxTabs = {};
 maxTabs.notificationId = "numOfTabsExceededWarning";
 
 chrome.tabs.onCreated.addListener(function () {
@@ -69,7 +69,7 @@ chrome.tabs.onRemoved.addListener(function() {
             }, function (tabs) {
                 var numOfTabs = tabs.length;
                 if (numOfTabs <= items.maxTabs) {
-                    chrome.notifications.clear("numOfTabsExceededWarning");
+                    chrome.notifications.clear(maxTabs.notificationId);
                 }
             });
         });
