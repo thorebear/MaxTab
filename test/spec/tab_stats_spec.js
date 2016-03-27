@@ -53,11 +53,11 @@ describe("tab_stats", function () {
 
                 chrome.tabs.update(tid1, {active: true}, function () {
                     setTimeout(function () {
-                        tab_stats.getLeastRecentlyActivatedTab(wid1, function (tab) {
+                        tab_stats.getLeastRecentlyActivatedTab(wid1, true, function (tab) {
                             expect(tab.id).toEqual(tid2);
                             chrome.tabs.update(tid2, {active: true}, function () {
                                 setTimeout(function () {
-                                    tab_stats.getLeastRecentlyActivatedTab(wid1, function (tab) {
+                                    tab_stats.getLeastRecentlyActivatedTab(wid1, true, function (tab) {
                                         expect(tab.id).toEqual(tid1);
                                         done();
                                     });
@@ -80,11 +80,11 @@ describe("tab_stats", function () {
 
                 chrome.tabs.update(tid1, {active: true}, function () {
                     setTimeout(function () {
-                        tab_stats.getLeastTimesActivatedTab(wid1, function (tab) {
+                        tab_stats.getLeastTimesActivatedTab(wid1, true, function (tab) {
                             expect(tab.id).toEqual(tid2);
                             chrome.tabs.update(tid2, {active: true}, function () {
                                 setTimeout(function () {
-                                    tab_stats.getLeastTimesActivatedTab(wid1, function (tab) {
+                                    tab_stats.getLeastTimesActivatedTab(wid1, true, function (tab) {
                                         expect(tab.id).toEqual(tid1);
                                         done();
                                     });
@@ -107,11 +107,11 @@ describe("tab_stats", function () {
 
                 chrome.tabs.update(tid1, {url: "http://google.com"}, function () {
                     setTimeout(function () {
-                        tab_stats.getLeastRecentlyUpdatedTab(wid1, function (tab) {
+                        tab_stats.getLeastRecentlyUpdatedTab(wid1, true, function (tab) {
                             expect(tab.id).toEqual(tid2);
                             chrome.tabs.update(tid2, {url: "http://google.com"}, function () {
                                 setTimeout(function () {
-                                    tab_stats.getLeastRecentlyUpdatedTab(wid1, function (tab) {
+                                    tab_stats.getLeastRecentlyUpdatedTab(wid1, true, function (tab) {
                                         expect(tab.id).toEqual(tid1);
                                         done();
                                     });
@@ -137,12 +137,12 @@ describe("tab_stats", function () {
                 chrome.tabs.create({
                     "windowId" : wid1
                 }, function(newTab) {
-                    tab_stats.getLeastRecentlyOpenedTab(wid1, function(tab) {
+                    tab_stats.getLeastRecentlyOpenedTab(wid1, false, function(tab) {
                         expect(tab.id).toEqual(tid1);
 
                         chrome.tabs.remove(tid1, function() {
                             setTimeout(function() {
-                                tab_stats.getLeastRecentlyOpenedTab(wid1, function (tab) {
+                                tab_stats.getLeastRecentlyOpenedTab(wid1, false, function (tab) {
                                     expect(tab.id).toEqual(newTab.id);
                                     done();
                                 });

@@ -1,17 +1,32 @@
 tab_stats = {};
 
 tab_stats = {
-    "getLeastRecentlyActivatedTab": function (wid, callback) {
-        this._getMin(wid, "last_active", callback);
+    "addTabStats": function (wid, tabs, callback) {
+        var tids = tabs.map(function(tab) { return "_tab__" + tab.id });
+
+        chrome_utilities.storage.window.get(wid, tids, function(tab_stats) {
+            tabs.forEach(function(tab) {
+                var tab_stat = tab_stats["_tab__" + tab.id];
+                if (tab_stat !== undefined) {
+                    Object.keys(tab_stat).forEach(function (stat) {
+                        tab[stat] = tab_stat[stat];
+                    });
+                }
+            });
+            callback(tabs);
+        });
     },
-    "getLeastRecentlyOpenedTab" : function (wid, callback) {
-        this._getMin(wid, "opened_time", callback);
+    "getLeastRecentlyActivatedTab": function (wid, allowPinned, callback) {
+        this._getMin(wid, allowPinned, "last_active", callback);
     },
-    "getLeastRecentlyUpdatedTab" : function (wid, callback) {
-        this._getMin(wid, "last_updated", callback);
+    "getLeastRecentlyOpenedTab" : function (wid, allowPinned, callback) {
+        this._getMin(wid, allowPinned, "opened_time", callback);
     },
-    "getLeastTimesActivatedTab" : function (wid, callback) {
-        this._getMin(wid, "times_activated", callback);
+    "getLeastRecentlyUpdatedTab" : function (wid, allowPinned, callback) {
+        this._getMin(wid, allowPinned, "last_updated", callback);
+    },
+    "getLeastTimesActivatedTab" : function (wid, allowPinned, callback) {
+        this._getMin(wid, allowPinned, "times_activated", callback);
     },
     "_tabCreated": function (wid, tid) {
         var currTime = new Date().getTime();
@@ -25,23 +40,48 @@ tab_stats = {
 
         chrome_utilities.storage.window.set(wid, json);
     },
-    "_getMin": function (wid, parameter, callback) {
-        chrome_utilities.storage.window.get(wid, null, function (items) {
-            var minKey = undefined;
-            Object.keys(items).forEach(function (key) {
-                if (key.substring(0, 6) === "_tab__") {
-                    if (minKey === undefined || items[key][parameter] < items[minKey][parameter]) {
-                        minKey = key;
+    "_getMin": function (wid, allowPinned, parameter, callback) {
+        var _getMineFiltering = function(filteringIds) {
+            chrome_utilities.storage.window.get(wid, null, function (items) {
+                var minKey = undefined;
+                Object.keys(items).forEach(function (key) {
+                    if (key.substring(0, 6) === "_tab__") {
+                        var tid = parseInt(key.substring(6));
+                        if (filteringIds.indexOf(tid) == -1) {
+                            if (minKey === undefined ||
+                                items[key][parameter] < items[minKey][parameter]) {
+                                minKey = key;
+                            }
+                        }
                     }
+                });
+                if (minKey === undefined) {
+                    callback();
+                } else {
+                    var minTid = minKey.substring(6);
+                    chrome.tabs.get(parseInt(minTid), callback);
                 }
             });
-            if (minKey === undefined) {
-                callback();
-            } else {
-                var minTid = minKey.substring(6);
-                chrome.tabs.get(parseInt(minTid), callback);
-            }
-        });
+        };
+
+        /*
+        If we do not allow pinned, we start by getting the id's of all pinned tabs,
+        such that we can filter these tabs.
+         */
+        if (allowPinned) {
+            _getMineFiltering([]);
+        } else {
+            chrome.tabs.query({
+                "windowId" : wid,
+                "pinned" : true
+            }, function(tabs) {
+                var pinnedIds = [];
+                tabs.forEach(function(tab) {
+                    pinnedIds.push(tab.id);
+                });
+                _getMineFiltering(pinnedIds);
+            });
+        }
     }
 
 };

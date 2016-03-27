@@ -10,7 +10,7 @@ max_tabs.defaultSettings = {
 };
 max_tabs.notificationId = "numOfTabsExceededWarning";
 
-max_tabs.onTabAddedOrUnpinned = function() {
+max_tabs.onTabAddedOrUnpinned = function (wid, tid) {
     chrome.storage.sync.get(["maxTabs", "exceedAction", "closePinned", "countPinned"],
         /**
          * @param {
@@ -18,62 +18,96 @@ max_tabs.onTabAddedOrUnpinned = function() {
          * {exceedAction:string},
          * {closePinned:boolean},
          * {countPinned:boolean}
-         * } items
+         * } options
          */
-        function (items) {
+        function (options) {
             chrome.tabs.query({
-                "currentWindow": true
+                "windowId": wid
             }, function (tabs) {
-                if (!items.countPinned) {
+
+                if (!options.countPinned) {
                     tabs = tabs.filter(function (tab) {
                         return !tab.pinned;
                     });
                 }
 
                 var numOfTabs = tabs.length;
-                if (numOfTabs > items.maxTabs) {
-                    if (items.exceedAction === "closeLeftmost") {
-                        var numToClose = numOfTabs - items.maxTabs;
-                        var tabsToClose = tabs.splice(0, numToClose);
-                        var idsToClose = [];
-                        tabsToClose.forEach(function (tab) {
-                            idsToClose.push(tab.id)
+                if (numOfTabs > options.maxTabs) {
+                    tab_stats.addTabStats(tabs[0].windowId, tabs, function (tabs) {
+
+                        // filter the tab that was just opened/unpinned:
+                        tabs.filter(function (tab) {
+                            return tab.id !== tid;
+                        });
+
+                        if (options.exceedAction === "showWarning") {
+                            chrome.notifications.create(max_tabs.notificationId, {
+                                type: "basic",
+                                title: chrome.i18n.getMessage("warning_title"),
+                                iconUrl: "/icons/exclamation.png",
+                                message: chrome.i18n.getMessage("warning_msg"),
+                                buttons: [{
+                                    title: chrome.i18n.getMessage("change_limit"),
+                                    iconUrl: "/icons/glyphicons-390-new-window-alt.png"
+                                }]
+                            });
+                            return;
+                        }
+
+                        if (options.exceedAction === "preventNewTab") {
+                            console.warn("TODO: Not implemented");
+                            // TODO
+                            return;
+                        }
+
+                        var numToClose = numOfTabs - options.maxTabs;
+                        var tabsToClose = [];
+
+                        switch (options.exceedAction) {
+                            case "closeLeftmost":
+                                tabsToClose = tabs.splice(0, numToClose);
+                                break;
+                            case "closeLRActive":
+                                break;
+                            case "closeLRUpdated":
+                                break;
+                            case "closeOldest":
+                                break;
+                            case "closeRandom":
+                                tabsToClose = tabs.shuffle().splice(0, numToClose);
+                                break;
+                        }
+
+
+                        var idsToClose = tabsToClose.map(function (tab) {
+                            return tab.id
                         });
                         chrome.tabs.remove(idsToClose);
-                    } else if (items.exceedAction === "showWarning") {
-                        chrome.notifications.create(max_tabs.notificationId, {
-                            type: "basic",
-                            title: chrome.i18n.getMessage("warning_title"),
-                            iconUrl: "/icons/exclamation.png",
-                            message: chrome.i18n.getMessage("warning_msg"),
-                            buttons: [{
-                                title: chrome.i18n.getMessage("change_limit"),
-                                iconUrl: "/icons/glyphicons-390-new-window-alt.png"
-                            }]
-                        });
-                    }
+                    });
                 }
             });
         });
-};
+}
 
-chrome.tabs.onCreated.addListener(function () {
-    max_tabs.onTabAddedOrUnpinned();
+chrome.tabs.onCreated.addListener(function (tab) {
+    var wid = tab.windowId;
+    max_tabs.onTabAddedOrUnpinned(wid, tab.id);
 });
 
-chrome.tabs.onUpdated.addListener(function(tid, changeInfo, tab) {
+chrome.tabs.onUpdated.addListener(function (tid, changeInfo, tab) {
     /*
-    If a tab is pinned changeInfo.pinned = true,
-    If a tab is unpinned changeInfo.pinned = false,
-    If pinned status is unchanged changeInfo.pinned = undefined
+     If a tab is pinned changeInfo.pinned = true,
+     If a tab is unpinned changeInfo.pinned = false,
+     If pinned status is unchanged changeInfo.pinned = undefined
      */
 
     /*
-    If we do not count pinned tabs, and a pinned tab is unpinned,
-    the window could potential exceed the number of allowed tabs
+     If we do not count pinned tabs, and a pinned tab is unpinned,
+     the window could potential exceed the number of allowed tabs
      */
-    if(changeInfo.pinned === false) {
-        max_tabs.onTabAddedOrUnpinned();
+    if (changeInfo.pinned === false) {
+        var wid = tab.windowId;
+        max_tabs.onTabAddedOrUnpinned(wid, tab.id);
     }
 });
 
@@ -86,7 +120,7 @@ chrome.notifications.onButtonClicked.addListener(function (notificationId, btnIn
     }
 });
 
-chrome.tabs.onRemoved.addListener(function() {
+chrome.tabs.onRemoved.addListener(function () {
     chrome.storage.sync.get({
             maxTabs: 5 // default value
         },
@@ -102,8 +136,10 @@ chrome.tabs.onRemoved.addListener(function() {
             chrome.tabs.query({
                 "currentWindow": true
             }, function (tabs) {
-                if(!items.countPinned) {
-                    tabs = tabs.filter(function(tab) { return !tab.pinned });
+                if (!items.countPinned) {
+                    tabs = tabs.filter(function (tab) {
+                        return !tab.pinned
+                    });
                 }
 
                 var numOfTabs = tabs.length;

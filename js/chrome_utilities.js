@@ -99,15 +99,14 @@ chrome_utilities.storage.window = {
                 callback(items);
                 return;
             }
-
+            var json = {};
             if (typeof keys === "string") {
                 // key-type: string
                 if (items === undefined) {
                     callback();
                     return;
                 }
-
-                var json = {};
+                
                 json[keys] = items[keys];
                 callback(json);
             } else if (typeof keys === "object") {
@@ -117,14 +116,12 @@ chrome_utilities.storage.window = {
                         callback();
                     }
 
-                    var json = {};
                     keys.forEach(function (_k) {
                         json[_k] = items[_k];
                     });
                     callback(json);
                 } else {
                     // key-type: dictionary specifying default values
-                    var json = {};
 
                     /*
                      If there exist no values in the storage, items will be undefined,
