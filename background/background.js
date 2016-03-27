@@ -2,6 +2,16 @@
 chrome.runtime.onInstalled.addListener(function (details) {
     if (details.reason == "install") {
         chrome.storage.sync.set(max_tabs.defaultSettings);
+
+        chrome.windows.getAll({
+            populate: true
+        }, function(windows) {
+            windows.forEach(function(window) {
+                window.tabs.forEach(function (tab) {
+                    tab_stats._tabCreated(window.id, tab.id);
+                });
+            });
+        });
     }
 });
 
