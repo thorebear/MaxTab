@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "__MSG_extension_title__",
   "description": "__MSG_extension_desc__",
-  "version": "0.1",
+  "version": "0.1.1",
   "icons": {
     "48": "icons/tab_new_raised.png"
   },
@@ -15,9 +15,7 @@
   "minimum_chrome_version": "23",
   "homepage_url": "https://github.com/thorebear/MaxTab",
   "permissions": [
-    "tabs",
     "storage",
-    "notifications",
-    "https://ajax.googleapis.com/"
+    "notifications"
   ]
 }

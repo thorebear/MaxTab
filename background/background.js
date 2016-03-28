@@ -12,6 +12,8 @@ chrome.runtime.onInstalled.addListener(function (details) {
                 });
             });
         });
+
+        chrome.runtime.openOptionsPage();
     }
 });
 
@@ -21,7 +23,7 @@ var max_tabs = {};
 max_tabs.defaultSettings = {
     // default values
     maxTabs: 5,
-    exceedAction: "closeLRActive",
+    exceedAction: "showWarning",
     countPinned: false,
     closePinned: false
 };
